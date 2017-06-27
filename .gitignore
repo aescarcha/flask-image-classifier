@@ -1,0 +1,9 @@
+.idea
+*.iml
+pip-selfcheck.json
+venv
+*.pyc
+bin
+lib
+include
+images
