@@ -63,7 +63,13 @@ def get_or_create( data ):
 
 
 def get_by_name( name ):
-    return query_db('select * from images WHERE name = ?', [name], True)
+    image = query_db('select * from images WHERE name = ?', [name], True)
+    if image:
+        image["labels"] = []
+        for labelRow in query_db('select * from image_labels WHERE image_id = ?', [image["id"]]):
+            image["labels"].append(labelRow["label"])
+
+    return image
 
 
 def create(data):

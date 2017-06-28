@@ -1,4 +1,5 @@
 .idea
+db/imageClassifier.db
 *.iml
 pip-selfcheck.json
 venv
