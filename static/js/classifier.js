@@ -4,6 +4,7 @@ $('document').ready(function(){
     printNextImage();
     $('.label-selector').on('click', function(){
         handleLabelClick( $(this) );
+        printNextImage();
     });
 });
 
@@ -21,8 +22,16 @@ function handleLabelClick( $this ) {
 }
 
 function printNextImage() {
-    console.log(images);
     image = images.shift();
+
+    if(!image){
+        $("#image-classifier-template").addClass('hidden');
+        alert('No more images to classify');
+        return;
+    }
+
+
+    $('.label-selector').removeClass('active');
 
     $("#image-classifier-template img").attr('src', 'static/images/' + image);
     $("#image-classifier-template").removeClass('hidden');
