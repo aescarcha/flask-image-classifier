@@ -27,9 +27,20 @@ def index():
 def save_images():
     data = request.get_json()
     result = get_or_create(data)
-    print "final"
-    print result
     return jsonify(result)
+
+@app.route('/images/<id>/labels', methods=['POST'])
+def save_label(id):
+    data = request.get_json()
+    create_label({'image_id': id, 'label': data["label"]})
+    return jsonify(data)
+
+@app.route('/images/<id>/labels', methods=['DELETE'])
+def delete_label(id):
+    data = request.get_json()
+    delete_label_by_name_image_id({'image_id': id, 'label': data["label"]})
+    return jsonify(data)
+
 
 @app.route('/static/images/<path:path>')
 def send_images(path):
@@ -53,7 +64,6 @@ def get_images():
 
 
 def get_or_create( data ):
-    print data
     existing = get_by_name( data["name"] )
     if existing:
         return existing
@@ -79,8 +89,18 @@ def create(data):
     conn.commit()
 
 
+def create_label(data):
+    conn = get_db()
+    conn.cursor().execute("INSERT  INTO image_labels (image_id, label) VALUES(?, ?)", [data["image_id"], data["label"]])
+    conn.commit()
+
+def delete_label_by_name_image_id(data):
+    conn = get_db()
+    conn.cursor().execute("DELETE FROM image_labels WHERE image_id = ? AND label = ?", [data["image_id"], data["label"]])
+    conn.commit()
+
+
 def make_dicts(cursor, row):
-    print "Make dicstsss"
     return dict((cursor.description[idx][0], value)
         for idx, value in enumerate(row))
 
@@ -102,7 +122,6 @@ def close_connection(exception):
 
 
 def query_db(query, args=(), one=False):
-    print args
     cur = get_db().execute(query, args)
     rv = cur.fetchall()
     cur.close()

@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS image_labels;
 CREATE TABLE IF NOT EXISTS image_labels(
  image_id INTEGER,
  label VARCHAR(128) NOT NULL,
+ UNIQUE (image_id, label) ON CONFLICT REPLACE
  FOREIGN KEY (image_id) REFERENCES images(id)
  );
 
