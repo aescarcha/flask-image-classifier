@@ -1,7 +1,9 @@
 from flask import Flask
-from flask import render_template
+from flask import render_template, make_response
 from flask import request, send_from_directory, jsonify
 from flask import g
+
+import StringIO, csv
 
 import sqlite3
 
@@ -16,11 +18,36 @@ app = Flask(__name__)
 app.config['imageFolder'] = 'images'
 app.config['labels'] = ['smoker', 'non smoker', 'teapot']
 
+
 @app.route('/')
 def index():
     files = get_images()
 
     return render_template('imagelist.html', images=files, config = app.config )
+
+
+@app.route('/export-csv')
+def csv_list():
+
+    csvList = get_labels_with_images()
+
+    if not csvList:
+        return "{}"
+
+
+    fieldNames = csvList[0].keys()
+    si = StringIO.StringIO()
+    print(fieldNames)
+    cw = csv.DictWriter(si, fieldnames=fieldNames)
+    cw.writeheader()
+    for row in csvList:
+        cw.writerow(row)
+
+    output = make_response(si.getvalue())
+
+    output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
 
 
 @app.route('/images', methods=['POST'])
@@ -29,11 +56,13 @@ def save_images():
     result = get_or_create(data)
     return jsonify(result)
 
+
 @app.route('/images/<id>/labels', methods=['POST'])
 def save_label(id):
     data = request.get_json()
     create_label({'image_id': id, 'label': data["label"]})
     return jsonify(data)
+
 
 @app.route('/images/<id>/labels', methods=['DELETE'])
 def delete_label(id):
@@ -81,6 +110,9 @@ def get_by_name( name ):
 
     return image
 
+
+def get_labels_with_images():
+    return query_db('select * from image_labels JOIN images on image_labels.image_id = images.id')
 
 def create(data):
     data["path"] = app.config['imageFolder'] + '/' + data["name"]
