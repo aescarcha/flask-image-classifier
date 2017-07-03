@@ -1,15 +1,17 @@
 from flask import Flask
-from flask import render_template, make_response
+from flask import render_template, make_response, send_file
 from flask import request, send_from_directory, jsonify
 from flask import g
 
 import StringIO, csv
-
+import uuid
 import sqlite3
+from shutil import copy2, make_archive
 
 # import common.loader as loader
-from os import listdir
+from os import listdir, makedirs
 from os.path import isfile, join
+import os
 
 DATABASE = 'db/imageClassifier.db'
 DB_SCHEMA = 'db/schema.sql'
@@ -34,10 +36,8 @@ def csv_list():
     if not csvList:
         return "{}"
 
-
     fieldNames = csvList[0].keys()
     si = StringIO.StringIO()
-    print(fieldNames)
     cw = csv.DictWriter(si, fieldnames=fieldNames)
     cw.writeheader()
     for row in csvList:
@@ -48,6 +48,13 @@ def csv_list():
     output.headers["Content-Disposition"] = "attachment; filename=export.csv"
     output.headers["Content-type"] = "text/csv"
     return output
+
+
+@app.route('/export-zip')
+def export_zip():
+    images = get_labels_with_images()
+    filePath = generate_zip( images )
+    return send_file(filePath, attachment_filename=filePath, as_attachment=True)
 
 
 @app.route('/images', methods=['POST'])
@@ -84,6 +91,19 @@ def send_css(path):
 @app.route('/static/js/<path:path>')
 def send_js(path):
     return send_from_directory('static/js', path)
+
+
+def generate_zip( images ):
+    dir = "/tmp/" + uuid.uuid4().hex
+
+    for image in images:
+        destination =  dir + '/' + image["label"] + '/'
+        if not os.path.isdir(destination):
+            makedirs(destination)
+        copy2(image["path"], destination)
+
+    zipFile = make_archive(dir, 'zip', dir)
+    return zipFile
 
 
 def get_images():
