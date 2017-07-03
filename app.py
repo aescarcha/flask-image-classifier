@@ -23,7 +23,10 @@ app.config['labels'] = ['smoker', 'non smoker', 'teapot']
 
 @app.route('/')
 def index():
-    files = get_images()
+    try:
+        files = get_images()
+    except OSError as e:
+        return "You must create the folder images before running the app"
 
     return render_template('imagelist.html', images=files, config = app.config )
 
