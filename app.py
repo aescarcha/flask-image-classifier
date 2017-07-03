@@ -137,6 +137,7 @@ def get_by_name( name ):
 def get_labels_with_images():
     return query_db('select * from image_labels JOIN images on image_labels.image_id = images.id')
 
+
 def create(data):
     data["path"] = app.config['imageFolder'] + '/' + data["name"]
     conn = get_db()
@@ -148,6 +149,7 @@ def create_label(data):
     conn = get_db()
     conn.cursor().execute("INSERT  INTO image_labels (image_id, label) VALUES(?, ?)", [data["image_id"], data["label"]])
     conn.commit()
+
 
 def delete_label_by_name_image_id(data):
     conn = get_db()
@@ -190,5 +192,6 @@ def init_db():
             db.cursor().executescript(f.read())
         db.commit()
 
-#Call init database on startup
+
+# Call init database on startup
 init_db()
