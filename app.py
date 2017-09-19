@@ -100,10 +100,13 @@ def generate_zip( images ):
     dir = "/tmp/" + uuid.uuid4().hex
 
     for image in images:
-        destination =  dir + '/' + image["label"] + '/'
-        if not os.path.isdir(destination):
-            makedirs(destination)
-        copy2(image["path"], destination)
+        try:
+            destination =  dir + '/' + image["label"] + '/'
+            if not os.path.isdir(destination):
+                makedirs(destination)
+            copy2(image["path"], destination)
+        except IOError as e:
+            print( "Could not find image " + image["path"])
 
     zipFile = make_archive(dir, 'zip', dir)
     return zipFile
