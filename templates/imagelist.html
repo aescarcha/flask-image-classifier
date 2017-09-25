@@ -9,11 +9,16 @@
         <img class="img-responsive col-xs-8 col-md-6 " src="" />
         <div class="labels col-xs-4 col-md-6">
             {% for label in config.labels %}
-                <a href="#" class="label-selector btn btn-info">
-                    {{ label }}
-                </a>
+            <a href="#" class="label-selector btn btn-info">
+                {{ label }}
+            </a>
             {% endfor %}
-        </div>
+            <div style="margin-top: 40px" class="clearfix">
+                <a href="#" id="skip-button" class="btn btn-default">
+                   Skip
+               </a>
+           </div>
+       </div>
     </div>
     <script>
         var images = JSON.parse('{{ images|tojson }}');

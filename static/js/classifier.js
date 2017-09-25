@@ -6,6 +6,7 @@ $('document').ready(function(){
         handleLabelClick( $(this) );
         printNextImage();
     });
+    $('#skip-button').on('click', printNextImage);
 });
 
 
