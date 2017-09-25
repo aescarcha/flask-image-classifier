@@ -24,7 +24,10 @@ app.config['labels'] = ['smoker', 'non smoker', 'teapot']
 @app.route('/')
 def index():
     try:
-        files = get_images()
+        files = get_file_images()
+        processedFiles = get_processed_images()
+        unprocessedFiles = get_unprocessed_files( files, processedFiles )
+        files = unprocessedFiles if unprocessedFiles else files
     except OSError as e:
         return "You must create the folder images before running the app"
 
@@ -111,8 +114,20 @@ def generate_zip( images ):
     zipFile = make_archive(dir, 'zip', dir)
     return zipFile
 
+def get_unprocessed_files( files, processedFiles ):
+    unprocessed = []
+    for file in files:
+        found = False
+        for processedFile in processedFiles:
+            if processedFile["name"] == file:
+                found = True
 
-def get_images():
+        if found == False:
+            unprocessed.append(file)
+
+    return unprocessed
+
+def get_file_images():
     imageFolder = app.config['imageFolder']
     files = [f for f in listdir(imageFolder) if (isfile(join(imageFolder, f)) and ".jpg" in f)]
     return files
@@ -139,6 +154,9 @@ def get_by_name( name ):
 
 def get_labels_with_images():
     return query_db('select * from image_labels JOIN images on image_labels.image_id = images.id')
+
+def get_processed_images():
+    return query_db('select * from images LEFT JOIN image_labels on image_labels.image_id = images.id')
 
 
 def create(data):
